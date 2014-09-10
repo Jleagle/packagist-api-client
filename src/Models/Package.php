@@ -9,6 +9,7 @@ class Package
   private $_url = '';
   private $_downloads = '';
   private $_favers = '';
+  private $_repository= '';
 
   function __construct(array $data = [])
   {
@@ -62,4 +63,13 @@ class Package
   {
     return $this->_favers;
   }
+
+  /**
+   * @return string
+   */
+  public function getRepository()
+  {
+    return $this->_repository;
+  }
+
 }

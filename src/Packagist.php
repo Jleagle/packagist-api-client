@@ -13,20 +13,36 @@ class Packagist
   private $_all = [];
   private $_packages = [];
 
-  public function __construct($apiUrl = 'https://packagist.org')
+  public function __construct($apiUrl = 'http://packagist.org')
   {
     $this->_apiUrl = $apiUrl;
   }
 
-  public function package($package)
+  public function package($author, $package = null)
   {
-
 
   }
 
-  public function search($search, $tags)
+  public function search($search, $tags = [], $page = 1)
   {
-    return http_build_query([$search]);
+    $query = http_build_query([
+      'q' => $search,
+      'tags' => $tags,
+      'page' => $page
+    ]);
+    $request = $this->_request('search.json?'.$query);
+
+    $return = [];
+    foreach($request['results'] as $package)
+    {
+      $return[] = new Package($package);
+    }
+
+    return [
+      'results' => $return,
+      'total' => $request['total'],
+      'pages' => ceil($request['total'] / 15),
+    ];
   }
 
   /**
@@ -57,22 +73,17 @@ class Packagist
   private function _request($path)
   {
     $client = new Guzzle();
-    $client->setDefaultOption('verify', false);
-//    $client->setDefaultOption('verify', '/Websites/cacert.pem');
+    $client->setDefaultOption('verify', true);
 
     $url = $this->_apiUrl.'/'.$path;
-
     $res = $client->get($url);
 
     if ($res->getStatusCode() != 200)
     {
-
+      // Exception
     }
 
-    $json = $res->json();
-
-    return $json;
-
+    return $res->json();
   }
 
   /**
@@ -87,14 +98,4 @@ class Packagist
   }
 
 }
-?>
-
-
-
-<?php
-//if(!function_exists('fnmatch')) {
-//  function fnmatch($pattern, $string) {
-//    return preg_match("#^".strtr(preg_quote($pattern, '#'), array('\*' => '.*', '\?' => '.'))."$#i", $string);
-//  }
-//}
 ?>
