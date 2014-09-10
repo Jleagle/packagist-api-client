@@ -2,74 +2,99 @@
 namespace Jleagle;
 
 use \GuzzleHttp\Client as Guzzle;
-use Jleagle\Models\Package;
 
 class Packagist
 {
 
   private $_apiUrl = '';
 
-  // Cache
-  private $_all = [];
-  private $_packages = [];
-
-  public function __construct($apiUrl = 'http://packagist.org')
+  public function __construct($apiUrl = 'https://packagist.org')
   {
     $this->_apiUrl = $apiUrl;
   }
 
+  /**
+   * @param string $author
+   * @param string $package
+   *
+   * @return array
+   * @throws \Exception
+   */
   public function package($author, $package = null)
   {
-
-  }
-
-  public function search($search, $tags = [], $page = 1)
-  {
-    $query = http_build_query([
-      'q' => $search,
-      'tags' => $tags,
-      'page' => $page
-    ]);
-    $request = $this->_request('search.json?'.$query);
-
-    $return = [];
-    foreach($request['results'] as $package)
+    if (!$package)
     {
-      $return[] = new Package($package);
+      list($author, $package) = explode('/', $author, 2);
     }
 
-    return [
-      'results' => $return,
-      'total' => $request['total'],
-      'pages' => ceil($request['total'] / 15),
-    ];
+    if (!$author || !$package)
+    {
+      throw new \Exception('No package specified');
+    }
+
+    $fullName = $author.'/'.$package;
+    $request = $this->_request('p/'.$fullName.'.json');
+    $package = $request['packages'][$fullName];
+
+    return $package;
   }
 
   /**
+   * @param string   $search
+   * @param string[] $tags
+   * @param int      $page
+   *
+   * @return array
+   * @throws \Exception
+   */
+  public function search($search = '', $tags = [], $page = 1)
+  {
+    if (!$search && !$tags && !$page)
+    {
+      throw new \Exception('Need to give at least one parameter');
+    }
+
+    $query = http_build_query([
+        'q' => $search,
+        'tags' => $tags,
+        'page' => $page
+      ]);
+
+    $request = $this->_request('search.json?'.$query);
+    $request['pages'] = (int)ceil($request['total'] / 15);
+
+    return $request;
+  }
+
+  /**
+   * Supports wildcards and ranges. eg.
+   * *z[en]d*
+   *
    * @param string $filter
    *
-   * @return Package[]
+   * @return string[]
    */
   public function all($filter = null)
   {
-    if (!$this->_all)
-    {
-      $request = $this->_request('packages/list.json');
-      $this->_all = $request['packageNames'];
-    }
-
     $return = [];
-    foreach($this->_all as $package)
+    $request = $this->_request('packages/list.json');
+    foreach($request['packageNames'] as $package)
     {
       if ($filter && !fnmatch($filter, $package))
       {
         continue;
       }
-      $return[] = new Package(['name' => $package]);
+      $return[] = $package;
     }
     return $return;
   }
 
+  /**
+   * @param string $path
+   *
+   * @return string
+   * @throws \Exception
+   */
   private function _request($path)
   {
     $client = new Guzzle();
@@ -80,22 +105,10 @@ class Packagist
 
     if ($res->getStatusCode() != 200)
     {
-      // Exception
+      throw new \Exception('Packagist did not respond correctly.');
     }
 
     return $res->json();
   }
 
-  /**
-   * @param $apiUrl
-   *
-   * @return $this
-   */
-  public function setApiUrl($apiUrl)
-  {
-    $this->_apiUrl = $apiUrl;
-    return $this;
-  }
-
 }
-?>
