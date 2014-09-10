@@ -7,6 +7,7 @@ class Packagist
 {
 
   private $_apiUrl = '';
+  private $_all = [];
 
   public function __construct($apiUrl = 'https://packagist.org')
   {
@@ -22,19 +23,19 @@ class Packagist
    */
   public function package($author, $package = null)
   {
-    if (!$package)
+    if(!$package)
     {
-      list($author, $package) = explode('/', $author, 2);
+      $explode = explode('/', $author, 2);
+      if(count($explode) != 2)
+      {
+        throw new \Exception('No package specified');
+      }
+      list($author, $package) = $explode;
     }
 
-    if (!$author || !$package)
-    {
-      throw new \Exception('No package specified');
-    }
-
-    $fullName = $author.'/'.$package;
-    $request = $this->_request('p/'.$fullName.'.json');
-    $package = $request['packages'][$fullName];
+    $fullName = $author . '/' . $package;
+    $request  = $this->_request('p/' . $fullName . '.json');
+    $package  = $request['packages'][$fullName];
 
     return $package;
   }
@@ -45,22 +46,18 @@ class Packagist
    * @param int      $page
    *
    * @return array
-   * @throws \Exception
    */
   public function search($search = '', $tags = [], $page = 1)
   {
-    if (!$search && !$tags && !$page)
-    {
-      throw new \Exception('Need to give at least one parameter');
-    }
-
-    $query = http_build_query([
-        'q' => $search,
+    $query = http_build_query(
+      [
+        'q'    => $search,
         'tags' => $tags,
         'page' => $page
-      ]);
+      ]
+    );
 
-    $request = $this->_request('search.json?'.$query);
+    $request          = $this->_request('search.json?' . $query);
     $request['pages'] = (int)ceil($request['total'] / 15);
 
     return $request;
@@ -76,16 +73,22 @@ class Packagist
    */
   public function all($filter = null)
   {
-    $return = [];
-    $request = $this->_request('packages/list.json');
-    foreach($request['packageNames'] as $package)
+    if(!$this->_all)
     {
-      if ($filter && !fnmatch($filter, $package))
+      $request = $this->_request('packages/list.json');
+      $this->_all = $request['packageNames'];
+    }
+
+    $return = [];
+    foreach($this->_all as $package)
+    {
+      if($filter && !fnmatch($filter, $package))
       {
         continue;
       }
       $return[] = $package;
     }
+
     return $return;
   }
 
@@ -100,15 +103,14 @@ class Packagist
     $client = new Guzzle();
     $client->setDefaultOption('verify', true);
 
-    $url = $this->_apiUrl.'/'.$path;
+    $url = $this->_apiUrl . '/' . $path;
     $res = $client->get($url);
 
-    if ($res->getStatusCode() != 200)
+    if($res->getStatusCode() != 200)
     {
       throw new \Exception('Packagist did not respond correctly.');
     }
 
     return $res->json();
   }
-
 }

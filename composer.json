@@ -3,10 +3,11 @@
   "keywords":    [
     "packagist",
     "api",
+    "client",
     "wrapper",
     "composer"
   ],
-  "description": "xx",
+  "description": "A simple API client for Packagist.",
   "authors":     [
     {
       "name":     "James Eagle",
@@ -20,6 +21,7 @@
     }
   },
   "require":     {
+    "php":               ">=5.4.0",
     "guzzlehttp/guzzle": "~4.0"
   },
   "require-dev": {
