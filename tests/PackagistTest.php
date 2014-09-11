@@ -12,7 +12,7 @@ class PackagistTest extends PHPUnit_Framework_TestCase
   public function testPackage()
   {
     $packagist = new Packagist('http://packagist.org');
-    $package = $packagist->package('jleagle/packagist-api-wrapper');
+    $package = $packagist->package('jleagle/packagist-api-client');
 
     $this->assertArrayHasKey('dev-master', $package);
     $this->assertArrayHasKey('name', $package['dev-master']);
@@ -39,11 +39,11 @@ class PackagistTest extends PHPUnit_Framework_TestCase
     $packagist = new Packagist('http://packagist.org');
 
     $all = $packagist->all();
-    $this->assertTrue(in_array('jleagle/packagist-api-wrapper', $all));
+    $this->assertTrue(in_array('jleagle/packagist-api-client', $all));
 
     $filtered = $packagist->all('*zend*');
     $this->assertTrue(in_array('zendframework/zend-authentication', $filtered));
-    $this->assertFalse(in_array('jleagle/packagist-api-wrapper', $filtered));
+    $this->assertFalse(in_array('jleagle/packagist-api-client', $filtered));
   }
 
   /**
