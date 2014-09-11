@@ -2,6 +2,7 @@
 namespace Jleagle;
 
 use \GuzzleHttp\Client as Guzzle;
+use GuzzleHttp\Exception\ClientException;
 
 class Packagist
 {
@@ -28,13 +29,20 @@ class Packagist
       $explode = explode('/', $author, 2);
       if(count($explode) != 2)
       {
-        throw new \Exception('No package specified');
+        throw new \Exception('No package specified.');
       }
       list($author, $package) = $explode;
     }
 
     $fullName = $author . '/' . $package;
-    $request  = $this->_request('p/' . $fullName . '.json');
+    try
+    {
+      $request = $this->_request('p/' . $fullName . '.json');
+    }
+    catch(ClientException $e)
+    {
+      throw new \Exception('Package does not exist.');
+    }
     $package  = $request['packages'][$fullName];
 
     return $package;
