@@ -14,8 +14,8 @@ class PackagistTest extends PHPUnit_Framework_TestCase
     $packagist = new Packagist('http://packagist.org');
     $package = $packagist->package('jleagle/packagist-api-client');
 
-    $this->assertArrayHasKey('dev-master', $package);
-    $this->assertArrayHasKey('name', $package['dev-master']);
+    $this->assertArrayHasKey('versions', $package);
+    $this->assertArrayHasKey('name', $package);
   }
 
   /**

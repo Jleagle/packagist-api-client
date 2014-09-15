@@ -10,6 +10,9 @@ class Packagist
   private $_apiUrl = '';
   private $_all = [];
 
+  /**
+   * @param string $apiUrl
+   */
   public function __construct($apiUrl = 'https://packagist.org')
   {
     $this->_apiUrl = $apiUrl;
@@ -37,13 +40,13 @@ class Packagist
     $fullName = $author . '/' . $package;
     try
     {
-      $request = $this->_request('p/' . $fullName . '.json');
+      $request = $this->_request('packages/' . $fullName . '.json');
     }
     catch(ClientException $e)
     {
       throw new \Exception('Package does not exist.');
     }
-    $package  = $request['packages'][$fullName];
+    $package  = $request['package'];
 
     return $package;
   }
