@@ -91,13 +91,16 @@ class Packagist
     }
 
     $return = [];
-    foreach($this->_all as $package)
+    if (is_array($this->_all))
     {
-      if($filter && !fnmatch($filter, $package))
+      foreach($this->_all as $package)
       {
-        continue;
+        if($filter && !fnmatch($filter, $package))
+        {
+          continue;
+        }
+        $return[] = $package;
       }
-      $return[] = $package;
     }
 
     return $return;
@@ -106,7 +109,7 @@ class Packagist
   /**
    * @param string $path
    *
-   * @return string
+   * @return array
    * @throws \Exception
    */
   private function _request($path)
