@@ -95,11 +95,11 @@ class Packagist
     {
       foreach($this->_all as $package)
       {
-        if($filter && !fnmatch($filter, $package))
+        if(!$filter || fnmatch($filter, $package))
         {
-          continue;
+          $return[] = $package;
         }
-        $return[] = $package;
+
       }
     }
 
