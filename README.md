@@ -1,10 +1,10 @@
 Packagist API Client
 ================
 
-[![Build Status (Travis)](https://img.shields.io/travis/Jleagle/packagist-api-client/master.svg)](https://travis-ci.org/Jleagle/packagist-api-client/builds)
-[![Code Quality (scrutinizer)](https://scrutinizer-ci.com/g/Jleagle/packagist-api-client/badges/quality-score.png)](https://scrutinizer-ci.com/g/Jleagle/packagist-api-client)
-[![Dependency Status (versioneye.com)](https://www.versioneye.com/php/Jleagle:packagist-api-client/badge.svg)](https://www.versioneye.com/php/Jleagle:packagist-api-client)
-[![Downloads Total](https://poser.pugx.org/Jleagle/packagist-api-client/downloads.svg)](https://packagist.org/packages/Jleagle/packagist-api-client)
+[![Build Status (Scrutinizer)](https://scrutinizer-ci.com/g/Jleagle/gazelle-api-client/badges/build.png)](https://scrutinizer-ci.com/g/Jleagle/gazelle-api-client)
+[![Code Quality (scrutinizer)](https://scrutinizer-ci.com/g/Jleagle/gazelle-api-client/badges/quality-score.png)](https://scrutinizer-ci.com/g/Jleagle/gazelle-api-client)
+[![Latest Stable Version](https://poser.pugx.org/Jleagle/gazelle-api-client/v/stable.png)](https://packagist.org/packages/Jleagle/gazelle-api-client)
+[![Latest Unstable Version](https://poser.pugx.org/Jleagle/gazelle-api-client/v/unstable.png)](https://packagist.org/packages/Jleagle/gazelle-api-client)
 
 This class allows you to retrieve information about packages from the Packagist "API".
 
