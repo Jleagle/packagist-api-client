@@ -1,30 +1,29 @@
 {
-  "name":        "jleagle/packagist-api-client",
-  "keywords":    [
+  "name": "jleagle/packagist-api-client",
+  "keywords": [
     "packagist",
     "api",
     "client",
-    "wrapper",
-    "composer"
+    "helper"
   ],
-  "description": "A simple API client for Packagist.",
-  "authors":     [
+  "description": "A small helper class to request package details from the Packagist API",
+  "authors": [
     {
-      "name":     "James Eagle",
-      "email":    "jimeagle@gmail.com",
+      "name": "James Eagle",
+      "email": "jimeagle@gmail.com",
       "homepage": "http://jimeagle.com"
     }
   ],
-  "autoload":    {
+  "autoload": {
     "psr-4": {
       "Jleagle\\": "src"
     }
   },
-  "require":     {
-    "php":               ">=5.4.0",
+  "require": {
+    "php": ">=5.4.0",
     "guzzlehttp/guzzle": "~4.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "4.1.*"
+    "phpunit/phpunit": "4.*"
   }
 }

@@ -6,7 +6,7 @@ Packagist API Client
 [![Latest Stable Version](https://poser.pugx.org/Jleagle/packagist-api-client/v/stable.png)](https://packagist.org/packages/Jleagle/packagist-api-client)
 [![Latest Unstable Version](https://poser.pugx.org/Jleagle/packagist-api-client/v/unstable.png)](https://packagist.org/packages/Jleagle/packagist-api-client)
 
-This class allows you to retrieve information about packages from the Packagist "API".
+A small helper class to request package details from the Packagist API
 
 ###Get a list of every package
 

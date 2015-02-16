@@ -28,7 +28,7 @@ class PackagistTest extends PHPUnit_Framework_TestCase
 
     $this->assertArrayHasKey('results', $search);
     $this->assertArrayHasKey('pages', $search);
-    $this->assertEquals(ceil($search['total']/15), $search['pages']);
+    $this->assertEquals(ceil($search['total'] / 15), $search['pages']);
   }
 
   /**
@@ -58,5 +58,4 @@ class PackagistTest extends PHPUnit_Framework_TestCase
     $packagist = new Packagist('http://packagist.org');
     $package = $packagist->package('xxx');
   }
-
 }

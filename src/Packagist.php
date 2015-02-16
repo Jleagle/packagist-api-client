@@ -46,7 +46,7 @@ class Packagist
     {
       throw new \Exception('Package does not exist.');
     }
-    $package  = $request['package'];
+    $package = $request['package'];
 
     return $package;
   }
@@ -68,7 +68,7 @@ class Packagist
       ]
     );
 
-    $request          = $this->_request('search.json?' . $query);
+    $request = $this->_request('search.json?' . $query);
     $request['pages'] = (int)ceil($request['total'] / 15);
 
     return $request;
@@ -91,15 +91,14 @@ class Packagist
     }
 
     $return = [];
-    if (is_array($this->_all))
+    if(is_array($this->_all))
     {
       foreach($this->_all as $package)
       {
-        if(!$filter || fnmatch($filter, $package))
+        if(!$filter || fnmatch($filter, $package, FNM_CASEFOLD))
         {
           $return[] = $package;
         }
-
       }
     }
 
