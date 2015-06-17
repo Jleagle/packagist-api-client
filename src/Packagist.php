@@ -1,14 +1,12 @@
 <?php
 namespace Jleagle;
 
-use \GuzzleHttp\Client as Guzzle;
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 
 class Packagist
 {
-
-  private $_apiUrl = '';
-  private $_all = [];
+  protected $_apiUrl;
 
   /**
    * @param string $apiUrl
@@ -63,7 +61,7 @@ class Packagist
     $query = http_build_query(
       [
         'q'    => $search,
-        'tags' => $tags,
+        'tags' => (array)$tags,
         'page' => $page
       ]
     );
@@ -84,16 +82,12 @@ class Packagist
    */
   public function all($filter = null)
   {
-    if(!$this->_all)
-    {
-      $request = $this->_request('packages/list.json');
-      $this->_all = $request['packageNames'];
-    }
+    $request = $this->_request('packages/list.json');
 
     $return = [];
-    if(is_array($this->_all))
+    if(is_array($request['packageNames']))
     {
-      foreach($this->_all as $package)
+      foreach($request['packageNames'] as $package)
       {
         if(!$filter || fnmatch($filter, $package, FNM_CASEFOLD))
         {
@@ -105,16 +99,48 @@ class Packagist
     return $return;
   }
 
+  public function latestAdded()
+  {
+    $rss = \Feed::loadRss($this->_apiUrl . '/feeds/packages.rss');
+    return $this->_handleRss($rss);
+  }
+
+  public function latestReleased()
+  {
+    $rss = \Feed::loadRss($this->_apiUrl . '/feeds/releases.rss');
+    return $this->_handleRss($rss);
+  }
+
+  protected function _handleRss(\Feed $rss)
+  {
+    $return = [];
+    foreach($rss->item as $item)
+    {
+      $return[] = [
+        'title'       => (string)$item->title,
+        'description' => (string)$item->description,
+        'link'        => (string)$item->link,
+        'guid'        => (string)$item->guid,
+        'author'      => (string)$item->author,
+        'creator'     => (string)$item->{'dc:creator'},
+        'comments'    => (string)$item->{'slash:comments'},
+        'time'        => (string)$item->timestamp,
+      ];
+    }
+
+    return $return;
+  }
+
+
   /**
    * @param string $path
    *
    * @return array
    * @throws \Exception
    */
-  private function _request($path)
+  protected function _request($path)
   {
-    $client = new Guzzle();
-    $client->setDefaultOption('verify', true);
+    $client = new Client();
 
     $url = $this->_apiUrl . '/' . $path;
     $res = $client->get($url);
