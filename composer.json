@@ -1,31 +1,37 @@
 {
-  "name":        "jleagle/packagist-api-client",
-  "keywords":    [
+  "name": "jleagle/packagist-api-client",
+  "keywords": [
     "packagist",
     "api",
     "client",
     "helper"
   ],
   "description": "A small helper class to request package details from the Packagist API",
-  "license":     "MIT",
-  "authors":     [
+  "license": "MIT",
+  "authors": [
     {
-      "name":     "James Eagle",
-      "email":    "jimeagle@gmail.com",
+      "name": "James Eagle",
+      "email": "jimeagle@gmail.com",
       "homepage": "http://jimeagle.com"
     }
   ],
-  "autoload":    {
+  "autoload": {
     "psr-4": {
       "Jleagle\\": "src"
     }
   },
-  "require":     {
-    "php":               ">=5.4.0",
-    "guzzlehttp/guzzle": "~5.0",
-    "dg/rss-php":        "~1.1"
+  "require": {
+    "php": ">=5.4.0",
+    "jleagle/curl-wrapper": "~0.1",
+    "vinelab/rss": "^1.0"
   },
   "require-dev": {
     "phpunit/phpunit": "~4.0"
-  }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@github.com:jleagle/curl-wrapper.git"
+    }
+  ]
 }

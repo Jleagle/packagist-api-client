@@ -1,19 +1,20 @@
 <?php
 namespace Jleagle;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
+use Jleagle\CurlWrapper\Curl;
+use Jleagle\CurlWrapper\Exceptions\CurlException;
+use Jleagle\Exceptions\PackagistException;
+use Jleagle\Exceptions\PackagistPackageNotFoundException;
+use Jleagle\Exceptions\PackagistServiceHookException;
+use Vinelab\Rss\Rss;
 
 class Packagist
 {
-  protected $_apiUrl;
+  protected static $_apiUrl = 'https://packagist.org';
 
-  /**
-   * @param string $apiUrl
-   */
-  public function __construct($apiUrl = 'https://packagist.org')
+  public static function setApiUrl($url)
   {
-    $this->_apiUrl = $apiUrl;
+    static::$_apiUrl = $url;
   }
 
   /**
@@ -23,7 +24,7 @@ class Packagist
    * @return array
    * @throws \Exception
    */
-  public function package($author, $package = null)
+  public static function package($author, $package = null)
   {
     if(!$package)
     {
@@ -38,11 +39,11 @@ class Packagist
     $fullName = $author . '/' . $package;
     try
     {
-      $request = $this->_request('packages/' . $fullName . '.json');
+      $request = static::_get('packages/' . $fullName . '.json');
     }
-    catch(ClientException $e)
+    catch(PackagistException $e)
     {
-      throw new \Exception('Package does not exist.');
+      throw new PackagistPackageNotFoundException('Package does not exist.');
     }
     $package = $request['package'];
 
@@ -56,7 +57,7 @@ class Packagist
    *
    * @return array
    */
-  public function search($search = '', $tags = [], $page = 1)
+  public static function search($search = '', $tags = [], $page = 1)
   {
     $query = http_build_query(
       [
@@ -66,7 +67,7 @@ class Packagist
       ]
     );
 
-    $request = $this->_request('search.json?' . $query);
+    $request = static::_get('search.json?' . $query);
     $request['pages'] = (int)ceil($request['total'] / 15);
 
     return $request;
@@ -80,9 +81,9 @@ class Packagist
    *
    * @return string[]
    */
-  public function all($filter = null)
+  public static function all($filter = null)
   {
-    $request = $this->_request('packages/list.json');
+    $request = static::_get('packages/list.json');
 
     $return = [];
     if(is_array($request['packageNames']))
@@ -99,57 +100,68 @@ class Packagist
     return $return;
   }
 
-  public function latestAdded()
+  public static function serviceHook($username, $apiToken, $packageUrl)
   {
-    $rss = \Feed::loadRss($this->_apiUrl . '/feeds/packages.rss');
-    return $this->_handleRss($rss);
-  }
+    $url = static::$_apiUrl . '/api/update-package?username=' . $username . '&apiToken=' . $apiToken;
 
-  public function latestReleased()
-  {
-    $rss = \Feed::loadRss($this->_apiUrl . '/feeds/releases.rss');
-    return $this->_handleRss($rss);
-  }
+    $data = [
+      'repository' => [
+        'url' => $packageUrl
+      ]
+    ];
+    $data = json_encode($data);
 
-  protected function _handleRss(\Feed $rss)
-  {
-    $return = [];
-    foreach($rss->item as $item)
+    $json = Curl::post($url, $data)
+      ->addHeader('Content-Type', 'application/json')
+      ->run()->getJson();
+
+    if($json['status'] == 'error')
     {
-      $return[] = [
-        'title'       => (string)$item->title,
-        'description' => (string)$item->description,
-        'link'        => (string)$item->link,
-        'guid'        => (string)$item->guid,
-        'author'      => (string)$item->author,
-        'creator'     => (string)$item->{'dc:creator'},
-        'comments'    => (string)$item->{'slash:comments'},
-        'time'        => (string)$item->timestamp,
-      ];
+      throw new PackagistServiceHookException($json['message']);
     }
 
-    return $return;
+    return true;
   }
 
+  public static function latestAdded()
+  {
+    $rss = new Rss();
+    $feed = $rss->feed(static::$_apiUrl . '/feeds/packages.rss');
+    return $feed->articles();
+  }
+
+  public static function latestReleased()
+  {
+    $rss = new Rss();
+    $feed = $rss->feed(static::$_apiUrl . '/feeds/releases.rss');
+    return $feed->articles();
+  }
 
   /**
    * @param string $path
    *
    * @return array
-   * @throws \Exception
+   *
+   * @throws PackagistException
    */
-  protected function _request($path)
+  protected static function _get($path)
   {
-    $client = new Client();
+    $exception = new PackagistException('Packagist did not respond correctly.');
 
-    $url = $this->_apiUrl . '/' . $path;
-    $res = $client->get($url);
-
-    if($res->getStatusCode() != 200)
+    try
     {
-      throw new \Exception('Packagist did not respond correctly.');
+      $response = Curl::get(static::$_apiUrl . '/' . $path)->run();
+    }
+    catch(CurlException $e)
+    {
+      throw $exception;
     }
 
-    return $res->json();
+    if($response->getHttpCode() != 200)
+    {
+      throw $exception;
+    }
+
+    return $response->getJson();
   }
 }
