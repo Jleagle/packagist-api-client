@@ -1,7 +1,9 @@
 <?php
 namespace Jleagle;
 
+use Illuminate\Support\Collection;
 use Jleagle\CurlWrapper\Curl;
+use Jleagle\CurlWrapper\Enums\ContentTypeEnum;
 use Jleagle\CurlWrapper\Exceptions\CurlException;
 use Jleagle\Exceptions\PackagistException;
 use Jleagle\Exceptions\PackagistPackageNotFoundException;
@@ -12,6 +14,9 @@ class Packagist
 {
   protected static $_apiUrl = 'https://packagist.org';
 
+  /**
+   * @param string $url
+   */
   public static function setApiUrl($url)
   {
     static::$_apiUrl = $url;
@@ -22,7 +27,8 @@ class Packagist
    * @param string $package
    *
    * @return array
-   * @throws \Exception
+   *
+   * @throws PackagistPackageNotFoundException
    */
   public static function package($author, $package = null)
   {
@@ -31,7 +37,7 @@ class Packagist
       $explode = explode('/', $author, 2);
       if(count($explode) != 2)
       {
-        throw new \Exception('No package specified.');
+        throw new PackagistPackageNotFoundException('No package specified.');
       }
       list($author, $package) = $explode;
     }
@@ -100,20 +106,32 @@ class Packagist
     return $return;
   }
 
+  /**
+   * @param string $username
+   * @param string $apiToken
+   * @param string $packageUrl
+   *
+   * @return bool
+   *
+   * @throws PackagistServiceHookException
+   */
   public static function serviceHook($username, $apiToken, $packageUrl)
   {
     $url = static::$_apiUrl . '/api/update-package?username=' . $username . '&apiToken=' . $apiToken;
 
-    $data = [
-      'repository' => [
-        'url' => $packageUrl
+    $data = json_encode(
+      [
+        'repository' => [
+          'url' => $packageUrl
+        ]
       ]
-    ];
-    $data = json_encode($data);
+    );
 
-    $json = Curl::post($url, $data)
-      ->addHeader('Content-Type', 'application/json')
-      ->run()->getJson();
+    $json = Curl
+      ::post($url, $data)
+      ->setContentType(ContentTypeEnum::JSON)
+      ->run()
+      ->getJson();
 
     if($json['status'] == 'error')
     {
@@ -123,6 +141,9 @@ class Packagist
     return true;
   }
 
+  /**
+   * @return Collection
+   */
   public static function latestAdded()
   {
     $rss = new Rss();
@@ -130,6 +151,9 @@ class Packagist
     return $feed->articles();
   }
 
+  /**
+   * @return Collection
+   */
   public static function latestReleased()
   {
     $rss = new Rss();
