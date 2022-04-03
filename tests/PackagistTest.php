@@ -1,7 +1,8 @@
 <?php
-use \Jleagle\Packagist;
+use Jleagle\Packagist;
+use PHPUnit\Framework\TestCase;
 
-class PackagistTest extends PHPUnit_Framework_TestCase
+class PackagistTest extends TestCase
 {
 
   /**
@@ -11,7 +12,7 @@ class PackagistTest extends PHPUnit_Framework_TestCase
    */
   public function testPackage()
   {
-    $packagist = new Packagist('http://packagist.org');
+    $packagist = new Packagist();
     $package = $packagist->package('jleagle/packagist-api-client');
 
     $this->assertArrayHasKey('versions', $package);
@@ -23,8 +24,8 @@ class PackagistTest extends PHPUnit_Framework_TestCase
    */
   public function testSearch()
   {
-    $packagist = new Packagist('http://packagist.org');
-    $search = $packagist->search();
+    $packagist = new Packagist();
+    $search = $packagist->search('packagist-api-client');
 
     $this->assertArrayHasKey('results', $search);
     $this->assertArrayHasKey('pages', $search);
@@ -36,14 +37,14 @@ class PackagistTest extends PHPUnit_Framework_TestCase
    */
   public function testAll()
   {
-    $packagist = new Packagist('http://packagist.org');
+    $packagist = new Packagist();
 
     $all = $packagist->all();
-    $this->assertTrue(in_array('jleagle/packagist-api-client', $all));
+    $this->assertContains('jleagle/packagist-api-client', $all);
 
     $filtered = $packagist->all('*zend*');
-    $this->assertTrue(in_array('zendframework/zend-authentication', $filtered));
-    $this->assertFalse(in_array('jleagle/packagist-api-client', $filtered));
+    $this->assertContains('zendframework/zend-authentication', $filtered);
+    $this->assertNotContains('jleagle/packagist-api-client', $filtered);
   }
 
   /**
@@ -53,9 +54,9 @@ class PackagistTest extends PHPUnit_Framework_TestCase
    */
   public function testPackageException()
   {
-    $this->setExpectedException('Exception');
+    $this->expectException('Exception');
 
-    $packagist = new Packagist('http://packagist.org');
+    $packagist = new Packagist();
     $package = $packagist->package('xxx');
   }
 }
